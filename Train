@@ -1,0 +1,253 @@
+# phyton_courses
+
+import json
+
+class JsonSerializable(object):
+    def toJson(self):
+        return json.dumps(self.__dict__)
+
+
+class Lokomotyvas(JsonSerializable):
+   
+
+    def __init__(self, lokomotyvo_nr, self_mass = 2, max_mass = 100):
+        try:
+            if isinstance(lokomotyvo_nr,int)==False or isinstance(self_mass,int)==False or isinstance(max_mass,int)==False:
+                raise ValueError
+            else:
+                self.lokomotyvo_nr = lokomotyvo_nr
+                self.self_mass = self_mass
+                self.max_mass = max_mass
+        except ValueError:
+            print('BLOGI LOKOMOTYVO DUOMENYS')
+    def __str__(self):
+        return 'Lokomotyvo nr: ' +str(self.lokomotyvo_nr)+', Lokomotyvo mase: '+str(self.self_mass)+', Lokomotyvo maksimali tempimo mase: '+str(self.max_mass)
+   
+   
+
+    def __add__(self, other):
+        
+        if isinstance(other, Vagonas):
+            return Traukinys([Lokomotyvas(self.lokomotyvo_nr, self.self_mass, self.max_mass),Vagonas(other.vagono_nr, other.kr_mass, other.self_mass, other.max_kr_mass)])
+        if isinstance(other, Lokomotyvas):
+            return Traukinys([Lokomotyvas(self.lokomotyvo_nr, self.self_mass, self.max_mass), Lokomotyvas(other.lokomotyvo_nr, other.self_mass, other.max_mass)])
+        if isinstance(other , Traukinys):
+            return Traukinys([other]+[Lokomotyvas(self.lokomotyvo_nr, self.self_mass, self.max_mass)])
+        
+        return Traukinys([Lokomotyvas(self.lokomotyvo_nr, self.self_mass, self.max_mass), Vagonas(other.vagono_nr, other.kr_mass, other.self_mass, other.max_kr_mass)])
+    
+    def __radd__(self, other):
+
+        if other == 0:
+            return self
+        else:
+            return self.__add__(other)
+        
+    def __eq__(self,other):
+        
+        if isinstance(other, Lokomotyvas) and self.lokomotyvo_nr == other.lokomotyvo_nr and self.self_mass == other.self_mass and self.max_mass == other.max_mass:
+            return True
+        else:
+            return False
+        
+    
+    
+    
+class Vagonas(JsonSerializable):
+    def __init__(self, vagono_nr, kr_mass=0, self_mass=1, max_kr_mass = 10):
+        try:
+            if isinstance(vagono_nr,int) == False or isinstance(kr_mass,int) == False or isinstance(self_mass, int) == False or isinstance(max_kr_mass, int) == False:
+                raise ValueError
+            else:
+                 self.vagono_nr = vagono_nr
+                 self.kr_mass = kr_mass
+                 self.max_kr_mass = max_kr_mass
+                 self.self_mass = self_mass
+                
+        except ValueError:
+            print('BLOGI VAGONO DUOMENYS')
+            
+
+    def get_mass(self):
+        return self.kr_mass
+    
+    def set_mass(self, mass):
+            self.kr_mass = mass
+
+        
+            if mass > self.max_kr_mass:
+                print('per didele mase vagonui')
+            else:
+                print ('Krovinys tinka vagonui')
+  
+    
+    mass = property(get_mass, set_mass)
+    
+    def __eq__(self,other):
+        
+        if isinstance(other, Vagonas) and self.vagono_nr == other.vagono_nr and self.kr_mass == other.kr_mass and self.max_kr_mass == other.max_kr_mass:
+            return True
+        else:
+            return False
+     
+    
+    def __add__(self, other):
+    
+        if isinstance(other, Vagonas):
+            return Traukinys([Vagonas(self.vagono_nr, self.kr_mass, self.self_mass, self.max_kr_mass),Vagonas(other.vagono_nr, other.kr_mass, other.self_mass, other.max_kr_mass)])
+        if isinstance(other, Lokomotyvas):
+            return Traukinys([Lokomotyvas(other.lokomotyvo_nr, other.self_mass, other.max_mass), Vagonas(self.vagono_nr, self.kr_mass, self.self_mass, self.max_kr_mass)])
+        if isinstance(other , Traukinys):
+            return Traukinys([other]+[Vagonas(self.vagono_nr, self.kr_mass, self.self_mass, self.max_kr_mass)])
+        
+        
+        
+    def __radd__(self, other):
+
+        if other == 0:
+            return self
+        else:
+            return self.__add__(other)
+    
+
+        
+    def __str__(self):
+        return 'Vagono nr: '+str(self.vagono_nr)+', Vezamo krovinio mase: '+str(self.kr_mass) + ', Vagono mase: '+str(self.self_mass)+', Maksimali krovinio mase: ' + str(self.max_kr_mass)
+    
+   
+
+        
+class Traukinys(JsonSerializable):
+
+    def __init__(self,l):
+        lokomotyvai = []
+        vagonai = []
+        for i in range(0,len(l)):
+            if isinstance(l[i],Lokomotyvas) == True:
+                lokomotyvai.append(l[i])
+            elif isinstance(l[i],Vagonas) == True:
+                vagonai.append(l[i])
+            else:
+                print('ivedet blogus objektus')
+                
+        self.lokomotyvai = lokomotyvai
+        self.vagonai = vagonai
+        
+    
+    def __add__(self, other):
+        
+        if isinstance(other, Vagonas):
+            return Traukinys(self.lokomotyvai + self.vagonai + [other])
+        elif isinstance(other, Lokomotyvas):    
+            return Traukinys(self.lokomotyvai +[other]+self.vagonai)
+        elif isinstance(other, Traukinys):
+            return Traukinys(self.lokomotyvai+other.lokomotyvai+self.vagonai+other.vagonai)
+        
+    def __radd__(self, other):
+
+        if other == 0:
+            return self
+        else:
+            return self.__add__(other)
+    
+        
+    def __sub__(self, other):
+        if isinstance(other, Vagonas):
+            self.vagonai.remove(other)
+            return Traukinys(self.lokomotyvai+self.vagonai)      
+        if isinstance(other, Lokomotyvas):
+            self.lokomotyvai.remove(other)
+            return Traukinys(self.lokomotyvai+self.vagonai)
+        if isinstance(other, Traukinys):
+            return Traukinys(list(set( self.lokomotyvai) - set(other.lokomotyvai))+list(set( self.lokomotyvai) - set(other.lokomotyvai)))
+    
+    def __len__(self):
+        return len(self.lokomotyvai + self.vagonai)
+     
+    def __bool__(self):
+        
+        if len(self.lokomotyvai + self.vagonai)==0 :
+            return False
+        else:
+            return True
+        
+    def __str__(self):
+        h=''
+        l = ''
+        for i in range(0,len(self.lokomotyvai)):
+             h += str(self.lokomotyvai[i])+'\n'
+        for i in range(0,len(self.vagonai)):
+            l+= str(self.vagonai[i])+'\n'
+        #for i in range(0,len(total_vagonai)):
+            
+        
+        result =  h+'\n'+l
+        return result
+    
+    def __eq__(self,other):
+        if isinstance(other, Traukinys) and self.vagonai == other.vagonai and self.lokomotyvai == other.lokomotyvai:
+            return True
+        else:
+            return False
+        
+    def __lt__(self,other):
+        if isinstance(other, Traukinys) and isinstance(self, Traukinys) and len(self)<len(other):
+            return True
+        else:
+            return False
+    
+    def patikrinti_traukini(self):
+            
+        v_self_mass_sum=0
+        v_kr_mass_sum=0
+        for i in range (0,len(self.vagonai)):
+            v_self_mass_sum+=self.vagonai[i].self_mass
+            v_kr_mass_sum +=self.vagonai[i].kr_mass
+            if self.vagonai[i].kr_mass > self.vagonai[i].max_kr_mass:
+                print('per didele vagono nr: '+str(self.vagonai[i].vagono_nr)+' krovinio mase')
+                
+        l_max_mass_sum = 0
+        l_self_mass = 0
+        for i in range(0,len(self.lokomotyvai)):
+            l_max_mass_sum += self.lokomotyvai[i].max_mass
+            l_self_mass += self.lokomotyvai[i].self_mass
+            
+        if len(self.lokomotyvai) == 0:
+            print('Traukinys negali vaziuoti be lokomotyvo, pridekit lokomotyva')
+        elif sum([v_kr_mass_sum,v_self_mass_sum])> l_max_mass_sum:
+            print('per didele mase Lokomotyvui. TRAUKINYS NEGALI VAZIUOTI')
+        else:
+            t_mase = sum([v_kr_mass_sum,v_self_mass_sum]) + l_self_mass
+            print('Traukinys pasiruoses vaziuoti,'+'bendra traukinio mase: '+str(sum([v_kr_mass_sum,v_self_mass_sum,l_self_mass])))        
+        
+    
+    
+#Metodas kuris pavercia traukini i Json formata.
+    def Json_format(self):
+        h=[]
+        self.lokomotyvas = self.lokomotyvas.toJson()
+        for i in range (0,len(self.vagonai)):
+            h.append(self.vagonai[i].toJson())
+        result = Traukinys(self.lokomotyvas, h)
+        return result
+            
+
+      
+lokomotyvas1 = Lokomotyvas(lokomotyvo_nr=1, max_mass=30)
+vagonas1 = Vagonas(vagono_nr = 1 , kr_mass = 11)
+vagonas2 = Vagonas(vagono_nr=2, kr_mass=10)
+vagonas3 = Vagonas(vagono_nr=3, kr_mass =10)
+
+z = Traukinys([lokomotyvas1, vagonas1, vagonas2, vagonas3])
+
+g = vagonas1+vagonas2
+m = g + lokomotyvas1 + vagonas1
+vagonas1.mass = 10
+g = vagonas1+vagonas2
+m = z + vagonas1
+print(m)
+m.patikrinti_traukini()
+#lokomotyvas1.toJson()
+#vagonas1.toJson()
+#z.toJson()
+#failas = open('failas.txt','w+')
