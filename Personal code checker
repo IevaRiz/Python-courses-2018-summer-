@@ -1,0 +1,34 @@
+import time
+
+start = time.time()
+s = time.clock()
+
+x=input('iveskite asmens koda: ')
+
+y=list(map(int,list(str(x))))
+
+i=0
+sum=y[9]
+j=2
+sum1=3*y[9]+2*y[8]+y[7]
+
+while i<9:
+        i+=1
+        sum=(sum+(y[i-1])*(i))%11
+if sum!=10 and y[10]==sum:
+      print('Asmens kodas teisingas')
+elif sum==10:
+       while j<7:
+           j+=1
+           sum1=sum1+(y[j-1])*(j)%11
+elif sum1!=10 and y[10]==sum1:
+        print('Asmens kodas teisingas2')
+elif y[10]==0:
+        print('Asmens kodas teisingas3')
+else:
+        print('blogas asmens kodas')
+
+end = time.time()
+e=time.clock()
+print(end-start)
+print(e-s)
